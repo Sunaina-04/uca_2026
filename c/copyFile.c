@@ -7,7 +7,7 @@
 // to make a copy function copy <file1> <file2>
 int main (int argc, char* argv[]){
 
-	// inputFd (file descriptor) and outputFd is used to store the integer identifier of the input and output fiels respectively. 
+	// inputFd (file descriptor) and outputFd is used to store the integer identifier of the input and output fields respectively. 
 	// openFlags is used to specify how the OS should open/ create file
 	int inputFd, outputFd, openFlags;
 	// mode_t and ssize are data types 
