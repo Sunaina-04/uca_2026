@@ -1,15 +1,17 @@
 #include <stdio.h>
 
 
-int sign(int num1, int num2){
-	return ~(~num1|~num2);
+int logicalShift(int num, int shift){
+	// in c >> performs arithmetic shift (preserves sign bit), we want logical shift, ie. shift should be covered by 0
+	int mask = ~(((1 << 31) >> shift) << 1);
+	return ((num >> shift) & mask);
 }
 int main(){
-	int num1, num2;
+	int num, shift;
 	
-	printf("Enter 2 numbers to AND: ");
-	scanf("%d %d", &num1, &num2);
+	printf("Enter number and shift: ");
+	scanf("%x %d", &num, &shift);
 
-	printf("AND of %d and %d is: %d \n", num1, num2, sign(num1, num2));
+	printf("Logical shift of 0x%x by %d is: 0x%x \n", num, shift, logicalShift(num, shift));
 	return 0;
 }
