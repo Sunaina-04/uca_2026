@@ -1,15 +1,16 @@
 #include <stdio.h>
 
 
-int sign(int num1, int num2){
-	return ~(~num1|~num2);
+int getByte(int num, int shift){
+	// F = 1111 so FF = 1111 1111 --> 8 bytes 
+	return ((num >> (shift << 3)) & 0xFF);
 }
 int main(){
-	int num1, num2;
+	int num, shift;
 	
-	printf("Enter 2 numbers to AND: ");
-	scanf("%d %d", &num1, &num2);
+	printf("Enter 2 numbers to get byte: ");
+	scanf("%x %d", &num, &shift);
 
-	printf("AND of %d and %d is: %d \n", num1, num2, sign(num1, num2));
+	printf("Extracted byte of 0x%x for %d byte is: 0x%x \n", num, shift, getByte(num, shift));
 	return 0;
 }
