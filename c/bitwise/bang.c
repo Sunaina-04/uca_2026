@@ -1,15 +1,17 @@
 #include <stdio.h>
 
 
-int sign(int num1, int num2){
-	return ~(~num1|~num2);
+int bang(int num){
+	// ~num +1 --> 2's complement | num 
+	// (num | 2's complement) >> 31 --> checks the sign of number, for both -ve and +ve but zero it is zero in both case, so if either +ve or -ve of number = to 1 at msb ==> it is not a 0, if it is we add 1 ==> o/p 
+	return ((num | (~num +1) ) >> 31) +1;
 }
 int main(){
-	int num1, num2;
+	int num;
 	
-	printf("Enter 2 numbers to AND: ");
-	scanf("%d %d", &num1, &num2);
+	printf("Enter number: ");
+	scanf("%d", &num);
 
-	printf("AND of %d and %d is: %d \n", num1, num2, sign(num1, num2));
+	printf("Bang of  %d is: %d \n", num, bang (num));
 	return 0;
 }
