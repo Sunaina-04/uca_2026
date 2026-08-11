@@ -1,0 +1,13 @@
+TASK  1 : 
+sed -r 's/([0-9]{4}-?){4}/xxxx-xxxx-xxxx-xxxx/g' server_access.log
+
+TASK 2 : 
+sed 's/HTTP\/1.0/HTTP\/1.1/g' server_access.log
+
+TASK 3 : 
+sed '/#/d' server_access.log
+
+Final answer :
+
+sed -r -e 's/([0-9]{4}-?){4}/xxxx-xxxx-xxxx-xxxx/g' -e 's/HTTP\/1.0/HTTP\/1.1/g' -e '/#/d' server_access.log
+

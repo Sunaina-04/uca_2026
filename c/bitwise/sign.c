@@ -1,15 +1,15 @@
 #include <stdio.h>
 
 
-int sign(int num1, int num2){
-	return ~(~num1|~num2);
+int sign(int num){
+	return ((num >> 31) | (!!num));
 }
 int main(){
-	int num1, num2;
+	int num;
 	
-	printf("Enter 2 numbers to AND: ");
-	scanf("%d %d", &num1, &num2);
+	printf("Enter number to get sign: ");
+	scanf("%d", &num);
 
-	printf("AND of %d and %d is: %d \n", num1, num2, sign(num1, num2));
+	printf("sign of %d is :%d \n", num, sign(num));
 	return 0;
 }
