@@ -1,0 +1,36 @@
+function* calculator_generator(){
+    let total = 0;
+
+    while (true){
+        // We will yield the current total and wait for the user to input a new value
+        const input = (yield total);
+
+        // If the user inputs nothing, we will continue to the next iteration of the loop
+        if (!input){
+            continue;
+        }
+
+        //op is declared as a constant variable and assigned the value of input.op, and num is declared as a constant variable and assigned the value of input.num
+        // how input.num is being fetched is --> that the input is expected to be an object with properties op and num, and we are using destructuring assignment to extract those properties into separate variables
+        const { op, num } = input;
+
+        switch (op) {
+            case '+': total += num; break;
+            case '-': total -= num; break;
+            case '*': total *= num; break;
+            case '/': total /= num; break;
+            case 'c': total = 0; break;
+            default: console.log('Invalid operator');
+        }
+    }
+}
+
+const calc = calculator_generator();
+
+calc.next(); // Start the generator
+
+console.log( calc.next({ op: '+', num: 5 }).value); // 5
+console.log( calc.next({ op: '*', num: 2 }).value); // 10
+console.log( calc.next({ op: '-', num: 3 }).value); // 7
+console.log( calc.next({ op: '/', num: 2 }).value); // 3.5
+console.log( calc.next({ op: 'c' }).value); // 0
