@@ -1,188 +1,144 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
 #include <string.h>
 
-void generateRandom(int *a, int s)
-{
-    int i;
-    for (i = 0; i < s; i++)
-    {
-        *(a + i) = rand() % s + 1;
+// Generic Swap function using raw memory buffers
+void genericSwap(void *a, void *b, size_t elem_size) {
+    void *temp = malloc(elem_size);
+    memcpy(temp, a, elem_size);
+    memcpy(a, b, elem_size);
+    memcpy(b, temp, elem_size);
+    free(temp);
+}
+
+// Generic Sink (Heapify Down) function
+void genericSink(void *arr, int size, int curr, int (*cmp)(const void *, const void *), size_t elem_size) {
+    int root = curr;
+    int left = curr * 2 + 1;
+    int right = curr * 2 + 2;
+
+    // Calculate byte offsets for dynamic array indexing: arr + index * elem_size
+    void *root_ptr = (char *)arr + root * elem_size;
+    void *left_ptr = (char *)arr + left * elem_size;
+    void *right_ptr = (char *)arr + right * elem_size;
+
+    // Compare left child with root
+    if (left < size && cmp(left_ptr, root_ptr) > 0) {
+        root = left;
+        root_ptr = left_ptr;
+    }
+    // Compare right child with current largest
+    if (right < size && cmp(right_ptr, root_ptr) > 0) {
+        root = right;
+        root_ptr = right_ptr;
+    }
+
+    // Swap and recurse down if root changed
+    if (curr != root) {
+        void *curr_ptr = (char *)arr + curr * elem_size;
+        genericSwap(curr_ptr, root_ptr, elem_size);
+        genericSink(arr, size, root, cmp, elem_size);
     }
 }
 
-void swap(void *a, int i, int j, int sz)
-{
-    printf("swap");
-    char *temp;
-    char t1 = (char *)(a + isz);
-    char t2 = (char *)(a + jsz);
-    memcpy(temp, t1, sz);
-    memcpy(t1, t2, sz);
-    memcpy(t2, temp, sz);
-}
-
-void quick_sort(void *a, int L, int R, int (*cmp)(void *, void *), int sz)
-{
-    printf("quick_sort");
-    if (L >= R)
-        return;
-    int p = L;
-    int x = L;
-    int i = L + 1;
-    for (; i <= R; i++)
-    {
-        if (cmp(a + i * sz, a + p * sz) < 0)
-        {
-            swap(a, i, ++x, sz);
-        }
+// Generic Heap Sort Function
+void genericHeapSort(void *arr, int size, int (*cmp)(const void *, const void *), size_t elem_size) {
+    // Step 1: Build Max-Heap (Heapify from non-leaf nodes up)
+    for (int i = (size / 2) - 1; i >= 0; i--) {
+        genericSink(arr, size, i, cmp, elem_size);
     }
-    swap(a, x, p, sz);
-    quick_sort(a, L, x - 1, cmp, sz);
-    quick_sort(a, x + 1, R, cmp, sz);
+
+    // Step 2: Extract elements one by one from top of heap
+    for (int i = size - 1; i > 0; i--) {
+        void *first_ptr = arr;
+        void *last_ptr = (char *)arr + i * elem_size;
+
+        genericSwap(first_ptr, last_ptr, elem_size);
+        genericSink(arr, i, 0, cmp, elem_size);
+    }
 }
 
-void printArray(int *array, int size) {
-	printf("[");
-	for(int i = 0; i < size; i++) {
-		printf(" %d ", arr[i]);
-	}
-	printf("]\n");
+// ==================== COMPARATOR FUNCTIONS ====================
+
+int intComparator(const void *a, const void *b) {
+    int x = *(const int *)a;
+    int y = *(const int *)b;
+    return (x > y) - (x < y);
 }
 
-struct student
-{
+int floatComparator(const void *a, const void *b) {
+    float x = *(const float *)a;
+    float y = *(const float *)b;
+    if (x == y) return 0;
+    return (x > y) ? 1 : -1;
+}
+
+struct student {
     int id;
     float cgpa;
     char *name;
 };
 
-int intCmparator(void *i, void *j)
-{
-    printf("intCmparator");
-    int x = *(int *)i;
-    int y = *(int *)j;
-    if (x == y)
-        return 0;
-    if (x < y)
-        return -1;
-    return +1;
-}
-//   float * = 120, 130    void *i = 120  void *j = 130 
-int floatCmparator(void *i, void *j)
-{
-    float x = *(float *)i;
-    float y = *(float *)j;
-    if (x == y)
-        return 0;
-    if (x < y)
-        return -1;
-    return +1;
-}
-
-int studentIdCmp(void *i, void *j)
-{
-    struct student *x = (struct student *)i;
-    struct student *y = (struct student *)j;
+int studentIdComparator(const void *a, const void *b) {
+    const struct student *x = (const struct student *)a;
+    const struct student *y = (const struct student *)b;
     return x->id - y->id;
 }
 
-
-void swap (int *heap, int pos1, int pos2) {
-	int temp = heap[pos1];
-	heap[pos1] = heap[pos2];
-	heap[pos2] = temp;
-}
-
-void sink(int *heap, int size, int curr) {
-	int root = curr;
-	int left = curr * 2 + 1;
-	int right = curr * 2 + 2;
-
-	if (left < size && heap[left] > heap[root]) {
-		root = left;
-	}
-	if (right < size && heap[right] > heap[root]) {
-		root =  right;
-	}
-
-	if (curr != root) {
-		swap(heap, curr, root);
-		sink(heap, size, root);
-	}
-}
-
-
-	// maybe the pointer required to be used is void 
-void heapSort(int *heap, int size) {
-	
-	for (int i = (size/2) -1; i >= 0; i--) {
-		sink(heap, size, current);
-	}
-
-	for (int i = size - 1; i >=0; i--) {
-		swap(heap, 0, i);
-
-		sink(heap, i, 0);
-	}
-}
+// ==================== MAIN DEMO ====================
 
 int main() {
+    // 1. INTEGER ARRAY DEMO
+    int arr[] = {5, 9, 4, 2, 8, 0};
+    int int_size = sizeof(arr) / sizeof(arr[0]);
 
-	// int array 
-	int arr[] = {5,9,4,2.8,0};
-	int size = sizeof(arr) / sizeof(arr[0]);
+    printf("Original Int Array: ");
+    for (int i = 0; i < int_size; i++) printf("%d ", arr[i]);
+    printf("\n");
 
-	generateRandom(arr, size);
-	
-	// print array 
-	printArray(arr, size);
-	
+    genericHeapSort(arr, int_size, intComparator, sizeof(int));
 
-	// heapSort 
-	heapSort(arr, size);
-	print(a, size);
+    printf("Sorted Int Array:   ");
+    for (int i = 0; i < int_size; i++) printf("%d ", arr[i]);
+    printf("\n\n");
 
-	// float Array 
-	float f[6] = {1.2, 3.4, .7, .8, .4, .3};
-    //quick_sort(f, 0, 5, floatCmparator, sizeof(float));
-    
-	//should print float array --> printArray()
-	int i;
-    	for (i = 0; i < 6; i++)
-    	{
-        	printf("%f ", f[i]);
-    	}
+    // 2. FLOAT ARRAY DEMO
+    float f[] = {1.2f, 3.4f, 0.7f, 0.8f, 0.4f, 0.3f};
+    int float_size = sizeof(f) / sizeof(f[0]);
 
-	// Struct data type 
-   	 int n = 7;
-   	 struct student *d = (struct student *)(malloc(sizeof(struct student *) * n));
+    printf("Original Float Array: ");
+    for (int i = 0; i < float_size; i++) printf("%.1f ", f[i]);
+    printf("\n");
 
-    	float cgpa[] = {1.2f, 2.2f, 1.3f, .7f, 5.4f, 2.3f, .9f};
-    	char *names[] = {"ram", "tina", "tom", "sam", "tom", "david", "harry"};
-   	for (i = 0; i < n; i++)
-    	{
-        	struct student *s = (struct student *)(malloc(sizeof(struct student *)));
-        	s->id = rand() % 100;
-        	s->cgpa = cgpa[i];
-        	s->name = names[i];
-        	d[i] = *s;
-    	}
-    	for (int i = 0; i < n; i++)
-    	{
-        	printf("%d:%s:%.2f, ", d[i].id, d[i].name, d[i].cgpa);
-    	}
-    	
-	// heap Sort 	
-//	quick_sort(d, 0, 6, studentIdCmp, sizeof(struct student *));
+    genericHeapSort(f, float_size, floatComparator, sizeof(float));
 
-    	
-	// print heap
-	for (int i = 0; i < n; i++)
-    	{
-        	printf("%d:%s:%.2f, ", d[i].id, d[i].name, d[i].cgpa);
-    	}
+    printf("Sorted Float Array:   ");
+    for (int i = 0; i < float_size; i++) printf("%.1f ", f[i]);
+    printf("\n\n");
 
-    	return 0;
+    // 3. STRUCT ARRAY DEMO
+    int n = 7;
+    struct student d[7];
+    float cgpa[] = {1.2f, 2.2f, 1.3f, 0.7f, 5.4f, 2.3f, 0.9f};
+    char *names[] = {"ram", "sham", "tom", "raj", "tom", "sam", "harry"};
+
+    for (int i = 0; i < n; i++) {
+        d[i].id = rand() % 100;
+        d[i].cgpa = cgpa[i];
+        d[i].name = names[i];
+    }
+
+    printf("Original Student Structs:\n");
+    for (int i = 0; i < n; i++) {
+        printf("ID: %2d | Name: %-5s | CGPA: %.2f\n", d[i].id, d[i].name, d[i].cgpa);
+    }
+
+    genericHeapSort(d, n, studentIdComparator, sizeof(struct student));
+
+    printf("\nSorted Student Structs (by ID):\n");
+    for (int i = 0; i < n; i++) {
+        printf("ID: %2d | Name: %-5s | CGPA: %.2f\n", d[i].id, d[i].name, d[i].cgpa);
+    }
+
+    return 0;
 }
